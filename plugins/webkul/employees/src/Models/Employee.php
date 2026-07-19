@@ -252,6 +252,17 @@ class Employee extends Model
         });
     }
 
+    private function resolvePartnerParentId(): ?int
+    {
+        if (! $this->parent_id) {
+            return null;
+        }
+
+        $partnerId = static::withTrashed()->whereKey($this->parent_id)->value('partner_id');
+
+        return $partnerId ? (int) $partnerId : null;
+    }
+
     private function handlePartnerCreation(self $employee): void
     {
         $partner = $employee->partner()->create([
@@ -264,7 +275,7 @@ class Employee extends Model
             'phone'        => $employee?->work_phone,
             'mobile'       => $employee?->mobile_phone,
             'color'        => $employee?->color,
-            'parent_id'    => $employee?->parent_id,
+            'parent_id'    => $employee->resolvePartnerParentId(),
             'company_id'   => $employee?->company_id,
             'user_id'      => $employee?->user_id,
         ]);
@@ -287,7 +298,7 @@ class Employee extends Model
                 'phone'        => $employee?->work_phone,
                 'mobile'       => $employee?->mobile_phone,
                 'color'        => $employee?->color,
-                'parent_id'    => $employee?->parent_id,
+                'parent_id'    => $employee->resolvePartnerParentId(),
                 'company_id'   => $employee?->company_id,
                 'user_id'      => $employee?->user_id,
             ]
